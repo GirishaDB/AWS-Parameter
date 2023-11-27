@@ -1,7 +1,7 @@
 import json
 
 import boto3
-def lambda_handler(event, context):
+def lambda_handler(event):
     # Get the source and destination regions
     source_region = 'ap-south-1' 
     dest_region = 'us-east-1'  
