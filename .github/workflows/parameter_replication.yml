@@ -17,6 +17,8 @@ env:
     DEST_REGION: ${{vars.DEST_REGION}}
     SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
     DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
+    TF_VAR_access_key: ${{vars.ACCESS_KEY}}
+    TF_VAR_secret_key: ${{vars.SECRET_KEY}}
   
 jobs:
     run-tests:
@@ -65,7 +67,7 @@ jobs:
   
     TerraformDeploy:
       name: 'TerraformDeploy'
-      runs-on: [ orchestrator-runner ]
+      runs-on: ubuntu-latest
       environment: Development
             
     # Setup the current working directory

@@ -49,3 +49,13 @@ variable "lambda_function_name" {
   default     = "parameter-replication"
 
 }
+
+variable "access_key" {
+  type        = string
+  description = "aws access key"
+}
+
+variable "secret_key" {
+  type        = string
+  description = "aws secret key"
+}

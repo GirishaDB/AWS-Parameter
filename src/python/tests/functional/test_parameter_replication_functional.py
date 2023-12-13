@@ -1,6 +1,7 @@
 import boto3
 from moto import mock_ssm
 import pytest
+import os
 
 import sys
 
@@ -10,8 +11,8 @@ from parameter_replication import lambda_handler
 @mock_ssm
 def test_lambda_handler():
     # Create mock SSM clients
-    source_region = 'eu-west-1'
-    dest_region = 'us-east-1'
+    source_region = os.environ.get('SOURCE_REGION')
+    dest_region = os.environ.get('DEST_REGION')
     source_ssm_client = boto3.client('ssm', region_name=source_region)
     dest_ssm_client = boto3.client('ssm', region_name=dest_region)
     
