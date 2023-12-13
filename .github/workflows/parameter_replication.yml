@@ -70,10 +70,10 @@ jobs:
       runs-on: ubuntu-latest
       environment: Development
             
-    # Setup the current working directory
-      defaults:
-        run:
-          working-directory: ${{github.workspace}}/src/terraform
+    # # Setup the current working directory
+    #   defaults:
+    #     run:
+    #       working-directory: src/terraform
             
       steps:
       # Checkout the repository to the GitHub Actions runner
@@ -94,7 +94,8 @@ jobs:
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
       - name: Terraform Init
         
-        run: | 
+        run: |
+          cd src/terraform
           terraform init
           terraform validate
           terraform plan -input=false --out=tfplan
