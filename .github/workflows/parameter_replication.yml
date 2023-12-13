@@ -70,21 +70,17 @@ jobs:
       runs-on: ubuntu-latest
       environment: Development
             
-    # # Setup the current working directory
-    #   defaults:
-    #     run:
-    #       working-directory: src/terraform
+    # Setup the current working directory
+      defaults:
+        run:
+          shell: bash
             
       steps:
       # Checkout the repository to the GitHub Actions runner
-      - name: Clone The Repository
-        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v3.5.2
+      - name: Checkout
+        uses: actions/checkout@v3
   
-      - name: Setup Node
-        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
-        with: 
-          node-version: 14
-  
+     
       # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
