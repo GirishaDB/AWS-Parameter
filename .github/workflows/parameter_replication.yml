@@ -20,7 +20,7 @@ env:
   
 jobs:
     run-tests:
-      runs-on: [ orchestrator-runner ]
+      runs-on: ubuntu-latest
       environment: Dev
       steps:
         - name: Check out repository code
