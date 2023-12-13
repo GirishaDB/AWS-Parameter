@@ -1,0 +1,103 @@
+name: "sonar_cloud_scan_github_actions"
+on:
+  push: 
+    branches: [ "feature/*" ]
+    paths: 
+      - "src/**"
+      - ".github/workflows/parameter_replication.yml"
+
+  pull_request:
+        types:
+          - closed
+        branches:
+          - 'main' 
+
+env:
+    SOURCE_REGION: ${{vars.SOURCE_REGION}}
+    DEST_REGION: ${{vars.DEST_REGION}}
+    SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
+    DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
+  
+jobs:
+    run-tests:
+      runs-on: [ orchestrator-runner ]
+      environment: Dev
+      steps:
+        - name: Check out repository code
+          uses: actions/checkout@v2
+  
+        - name: Set up Python 3.12
+          uses: actions/setup-python@v4
+          with:
+            python-version: 3.12
+  
+        - name: Install dependencies for unit testing
+          run: |
+            cd src/python/tests/unit
+            python -m pip install --upgrade pip
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+  
+        - name: Install dependencies for functional testing
+          run: |
+            cd src/python/tests/functional
+            python -m pip install --upgrade pip
+            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+  
+        - name: unit and functional testing with pytest
+          run: |
+            cd src
+            pytest --cov=python --cov-fail-under=80 -v
+  
+        # Setup Terraform for testing
+        - name: Setup Terraform
+          uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+          with:
+            terraform_version: "1.6.2"
+            terraform_wrapper: false
+  
+        - name: Unit Testing with Terraform Test
+          id: ttest
+          run : |
+            cd src/terraform
+            terraform init
+            terraform test
+      
+  
+    TerraformDeploy:
+      name: 'TerraformDeploy'
+      runs-on: [ orchestrator-runner ]
+      environment: Development
+            
+    # Setup the current working directory
+      defaults:
+        run:
+          working-directory: ${{github.workspace}}/src/terraform
+            
+      steps:
+      # Checkout the repository to the GitHub Actions runner
+      - name: Clone The Repository
+        uses: actions/checkout@e2f20e631ae6d7dd3b768f56a5d2af784dd54791 # v3.5.2
+  
+      - name: Setup Node
+        uses: actions/setup-node@2fddd8803e2f5c9604345a0b591c3020ee971a93
+        with: 
+          node-version: 14
+  
+      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+        with:
+          terraform_version: "1.6.2"
+          
+      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Terraform Init
+        
+        run: | 
+          terraform init
+          terraform validate
+          terraform plan -input=false --out=tfplan
+          
+      - name: Terraform Apply
+        if: ${{ github.event.pull_request.merged == true }}
+        run: |
+          terraform apply -auto-approve -input=false tfplan
