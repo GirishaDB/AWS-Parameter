@@ -24,6 +24,12 @@ resource "aws_lambda_function" "parameter_replication" {
   runtime       = "python3.12"
   depends_on    = [aws_iam_role_policy_attachment.role_policy_attachment]
 
+  environment {
+    variables = {
+      SOURCE_REGION = var.source_region
+      DEST_REGION   = var.dest_region
+    }
+  }
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
