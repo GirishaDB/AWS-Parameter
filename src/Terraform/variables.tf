@@ -9,7 +9,7 @@
 variable "platform_name" {
   type        = string
   description = "The name of the project"
-  default     = "se-intelds"
+  default     = "org"
 }
 
 # variable "account_id" {
@@ -20,7 +20,7 @@ variable "platform_name" {
 variable "account_name" {
   type        = string
   description = "Name of the account"
-  default     = "dih"
+  default     = "test"
 
 }
 
