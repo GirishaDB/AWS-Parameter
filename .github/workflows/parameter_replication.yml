@@ -17,6 +17,8 @@ env:
     DEST_REGION: ${{vars.DEST_REGION}}
     SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
     DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
+    TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
+    TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
     
 jobs:
     run-tests:
