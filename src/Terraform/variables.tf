@@ -1,15 +1,15 @@
 
 
-# variable "region" {
-#   type        = string
-#   description = "Primary AWS region"
-#   default     = "euwe1"
-# }
+variable "region" {
+  type        = string
+  description = "Primary AWS region"
+  default     = "euwe1"
+}
 
 variable "platform_name" {
   type        = string
   description = "The name of the project"
-  default     = "org"
+  default     = "se-intelds"
 }
 
 # variable "account_id" {
@@ -20,7 +20,7 @@ variable "platform_name" {
 variable "account_name" {
   type        = string
   description = "Name of the account"
-  default     = "test"
+  default     = "edh"
 
 }
 
@@ -43,7 +43,7 @@ variable "env" {
 
 
 
-variable "lambda_function_name" {
+variable "function_name" {
   type        = string
   description = "Name of the lambda function"
   default     = "parameter-replication"
@@ -63,6 +63,7 @@ variable "secret_key" {
 variable "source_region" {
   description = "Source AWS region"
   type        = string
+
 }
 variable "dest_region" {
   description = "Destination AWS region"
