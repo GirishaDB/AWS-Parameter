@@ -105,4 +105,4 @@ jobs:
         working-directory: src/Terraform
         if: ${{ github.event.pull_request.merged == true }}
         #run: terraform apply -auto-approve -input=false tfplan
-        run: terraform apply -auto-approve -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"s
+        run: terraform apply -auto-approve -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
