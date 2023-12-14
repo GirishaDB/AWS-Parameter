@@ -13,8 +13,8 @@ on:
           - 'main' 
 
 env:
-    TF_SOURCE_REGION: ${{vars.SOURCE_REGION}}
-    TF_DEST_REGION: ${{vars.DEST_REGION}}
+    TF_VAR_source_region: ${{vars.SOURCE_REGION}}
+    TF_VAR_dest_region: ${{vars.DEST_REGION}}
     # SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
     # DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
     TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
@@ -104,5 +104,5 @@ jobs:
       - name: Terraform Apply
         if: ${{ github.event.pull_request.merged == true }}
         working-directory: src/Terraform
-        # run: terraform apply -auto-approve -input=false tfplan
-        run: terraform apply -auto-approve -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
+        run: terraform apply -auto-approve -input=false tfplan
+        # run: terraform apply -auto-approve -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
