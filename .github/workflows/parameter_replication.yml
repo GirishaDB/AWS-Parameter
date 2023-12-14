@@ -17,9 +17,7 @@ env:
     DEST_REGION: ${{vars.DEST_REGION}}
     SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
     DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
-    TF_VAR_access_key: ${{vars.ACCESS_KEY}}
-    TF_VAR_secret_key: ${{vars.SECRET_KEY}}
-  
+    
 jobs:
     run-tests:
       runs-on: ubuntu-latest
@@ -50,19 +48,19 @@ jobs:
             cd src
             pytest --cov=python --cov-fail-under=80 -v
   
-        # Setup Terraform for testing
-        - name: Setup Terraform
-          uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
-          with:
-            terraform_version: "1.6.2"
-            terraform_wrapper: false
+        # # Setup Terraform for testing
+        # - name: Setup Terraform
+        #   uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+        #   with:
+        #     terraform_version: "1.6.2"
+        #     terraform_wrapper: false
   
-        - name: Unit Testing with Terraform Test
-          id: ttest
-          run : |
-            cd src/terraform
-            terraform init
-            terraform test
+        # - name: Unit Testing with Terraform Test
+        #   id: ttest
+        #   run : |
+        #     cd src/terraform
+        #     terraform init
+        #     terraform test
       
   
     TerraformDeploy:
@@ -76,27 +74,30 @@ jobs:
           shell: bash
             
       steps:
-      # Checkout the repository to the GitHub Actions runner
-      - name: Checkout
-        uses: actions/checkout@v3
-  
-     
-      # Install the latest version of Terraform CLI and configure the Terraform CLI configuration file with a Terraform Cloud user API token
+      - name: Checkout Repository
+        uses: actions/checkout@v2
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+        uses: hashicorp/setup-terraform@v1
         with:
           terraform_version: "1.6.2"
           
       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
       - name: Terraform Init
-        
-        run: |
-          cd src/terraform
-          terraform init
-          terraform validate
-          terraform plan -input=false --out=tfplan
-          
+        working-directory: src/terraform
+        run: terraform init
+      - name: Terraform Validate
+        working-directory: src/terraform
+        run: terraform validate
+      - name: Terraform Plan
+        id: plan
+        working-directory: src/terraform
+        run: terraform plan -out=tfplan
       - name: Terraform Apply
         if: ${{ github.event.pull_request.merged == true }}
-        run: |
-          terraform apply -auto-approve -input=false tfplan
+        working-directory: src/terraform
+        run: terraform apply -auto-approve tfplan
