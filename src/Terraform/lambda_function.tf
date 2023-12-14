@@ -1,9 +1,3 @@
-provider "aws" {
-  region     = "ap-south-1"
-  access_key = var.access_key
-  secret_key = var.secret_key
-}
-
 
 resource "aws_iam_role" "iam_for_lambda" {
   name               = "iam-role-${var.lambda_function_name}"
