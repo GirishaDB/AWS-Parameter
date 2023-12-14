@@ -99,7 +99,8 @@ jobs:
       - name: Terraform Plan
         id: plan
         working-directory: src/Terraform
-        run: terraform plan -input=false --out=tfplan
+        # run: terraform plan -input=false --out=tfplan
+        run: terraform plan -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
       - name: Terraform Apply
         if: ${{ github.event.pull_request.merged == true }}
         working-directory: src/Terraform
