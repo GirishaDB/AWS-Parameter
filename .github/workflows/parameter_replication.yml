@@ -13,10 +13,10 @@ on:
           - 'main' 
 
 env:
-    SOURCE_REGION: ${{vars.SOURCE_REGION}}
-    DEST_REGION: ${{vars.DEST_REGION}}
-    SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
-    DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
+    TF_SOURCE_REGION: ${{vars.SOURCE_REGION}}
+    TF_DEST_REGION: ${{vars.DEST_REGION}}
+    # SOURCE_SHORT_NAME: ${{vars.SOURCE_SHORT_NAME}}
+    # DEST_SHORT_NAME: ${{vars.DEST_SHORT_NAME}}
     TF_VAR_access_key: ${{ secrets.ACCESS_KEY }}
     TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
     

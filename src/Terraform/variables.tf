@@ -59,3 +59,12 @@ variable "secret_key" {
   type        = string
   description = "aws secret key"
 }
+
+variable "source_region" {
+  description = "Source AWS region"
+  type        = string
+}
+variable "dest_region" {
+  description = "Destination AWS region"
+  type        = string
+}
