@@ -26,13 +26,13 @@ resource "aws_lambda_function" "parameter_replication" {
 
   environment {
     variables = {
-      SOURCE_REGION = var.source_region
+      SOURCE_REGION = var.source_region,
       DEST_REGION   = var.dest_region
     }
   }
 }
 
 resource "aws_cloudwatch_log_group" "log_group" {
-  name              = "/aws/lambda/${var.lambda_function_name}"
+  name              = "/aws/lambda/${aws_lambda_function.parameter_replication.function_name}"
   retention_in_days = 30
 }
