@@ -4,3 +4,8 @@
 # output name {
 
 # }
+
+output "name" {
+  value = "value is ${var.source_region}"
+
+}
