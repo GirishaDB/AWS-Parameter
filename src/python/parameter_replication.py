@@ -8,8 +8,8 @@ def lambda_handler(event, context):
     # Get the source and destination regions
     source_region = os.environ.get('SOURCE_REGION')
     dest_region = os.environ.get('DEST_REGION')
-    source_short_name = os.environ.get('SOURCE_SHORT_NAME')
-    dest_short_name = os.environ.get('DEST_SHORT_NAME')
+    source_short_name = 'apso1'
+    dest_short_name = 'usea1'
     # Initialize AWS SDK clients for Parameter Store in both regions
     source_ssm_client = boto3.client('ssm', region_name=source_region)
     dest_ssm_client = boto3.client('ssm', region_name=dest_region)
