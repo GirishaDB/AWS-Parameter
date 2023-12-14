@@ -89,16 +89,16 @@ jobs:
           aws-secret-access-key: ${{ secrets.SECRET_KEY }}
           aws-region: ap-south-1
       - name: Terraform Init
-        working-directory: src/terraform
+        working-directory: src/Terraform
         run: terraform init
       - name: Terraform Validate
-        working-directory: src/terraform
+        working-directory: src/Terraform
         run: terraform validate
       - name: Terraform Plan
         id: plan
-        working-directory: src/terraform
+        working-directory: src/Terraform
         run: terraform plan -out=tfplan
       - name: Terraform Apply
         if: ${{ github.event.pull_request.merged == true }}
-        working-directory: src/terraform
+        working-directory: src/Terraform
         run: terraform apply -auto-approve tfplan
