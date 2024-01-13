@@ -21,88 +21,119 @@ env:
     TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
     
 jobs:
-    run-tests:
-      runs-on: ubuntu-latest
-      environment: Dev
-      steps:
-        - name: Check out repository code
-          uses: actions/checkout@v2
+ integration-test:
+  runs-on: [ ubuntu-latest ]
+  defaults:
+    run:
+      working-directory: ${{ github.workspace }}/src/edh/python/tests/integration
+  steps:
+    - name: Check out repository code
+      uses: actions/checkout@v2
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.11
+    - name: Install dependencies for integration testing
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Configure AWS Credentials        
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        role-to-assume: ${{ vars.BUILD_ROLE }}
+        aws-region: ${{ vars.AWS_REGION }}
+        role-external-id: ${{ secrets.BUILD_ROLE_EXTERNAL_ID }}
+        role-session-name: GitHubBuildNotifications
+        role-skip-session-tagging: true
+        role-duration-seconds: 900
+        
+    - name: Run integration tests
+      run: python3 integration.py
+# jobs:
+#     run-tests:
+#       runs-on: ubuntu-latest
+#       environment: Dev
+#       steps:
+#         - name: Check out repository code
+#           uses: actions/checkout@v2
   
-        - name: Set up Python 3.12
-          uses: actions/setup-python@v4
-          with:
-            python-version: 3.12
+#         - name: Set up Python 3.12
+#           uses: actions/setup-python@v4
+#           with:
+#             python-version: 3.12
   
-        - name: Install dependencies for unit testing
-          run: |
-            cd src/python/tests/unit
-            python -m pip install --upgrade pip
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#         - name: Install dependencies for unit testing
+#           run: |
+#             cd src/python/tests/unit
+#             python -m pip install --upgrade pip
+#             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
   
-        - name: Install dependencies for functional testing
-          run: |
-            cd src/python/tests/functional
-            python -m pip install --upgrade pip
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+#         - name: Install dependencies for functional testing
+#           run: |
+#             cd src/python/tests/functional
+#             python -m pip install --upgrade pip
+#             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
   
-        - name: unit and functional testing with pytest
-          run: |
-            cd src
-            pytest --cov=python --cov-fail-under=80 -v
+#         - name: unit and functional testing with pytest
+#           run: |
+#             cd src
+#             pytest --cov=python --cov-fail-under=80 -v
   
-        # # Setup Terraform for testing
-        # - name: Setup Terraform
-        #   uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
-        #   with:
-        #     terraform_version: "1.6.2"
-        #     terraform_wrapper: false
+#         # # Setup Terraform for testing
+#         # - name: Setup Terraform
+#         #   uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+#         #   with:
+#         #     terraform_version: "1.6.2"
+#         #     terraform_wrapper: false
   
-        # - name: Unit Testing with Terraform Test
-        #   id: ttest
-        #   run : |
-        #     cd src/terraform
-        #     terraform init
-        #     terraform test
+#         # - name: Unit Testing with Terraform Test
+#         #   id: ttest
+#         #   run : |
+#         #     cd src/terraform
+#         #     terraform init
+#         #     terraform test
       
   
-    TerraformDeploy:
-      name: 'TerraformDeploy'
-      runs-on: ubuntu-latest
-      environment: Development
+#     TerraformDeploy:
+#       name: 'TerraformDeploy'
+#       runs-on: ubuntu-latest
+#       environment: Development
             
-    # Setup the current working directory
-      defaults:
-        run:
-          shell: bash
+#     # Setup the current working directory
+#       defaults:
+#         run:
+#           shell: bash
             
-      steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: "1.6.2"
+#       steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v1
+#         with:
+#           terraform_version: "1.6.2"
           
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
-      - name: Terraform Init
-        working-directory: src/Terraform
-        run: terraform init
-      - name: Terraform Validate
-        working-directory: src/Terraform
-        run: terraform validate
-      - name: Terraform Plan
-        id: plan
-        working-directory: src/Terraform
-        #run: terraform plan -input=false --out=tfplan
-        run: terraform plan -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
-      - name: Terraform Apply
-        working-directory: src/Terraform
-        if: ${{ github.event.pull_request.merged == true }}
-        #run: terraform apply -auto-approve -input=false tfplan
-        run: terraform apply -auto-approve
+#       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+#           aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+#           aws-region: ap-south-1
+#       - name: Terraform Init
+#         working-directory: src/Terraform
+#         run: terraform init
+#       - name: Terraform Validate
+#         working-directory: src/Terraform
+#         run: terraform validate
+#       - name: Terraform Plan
+#         id: plan
+#         working-directory: src/Terraform
+#         #run: terraform plan -input=false --out=tfplan
+#         run: terraform plan -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
+#       - name: Terraform Apply
+#         working-directory: src/Terraform
+#         if: ${{ github.event.pull_request.merged == true }}
+#         #run: terraform apply -auto-approve -input=false tfplan
+#         run: terraform apply -auto-approve
+  
