@@ -39,7 +39,7 @@ jobs:
     - name: Configure AWS Credentials        
       uses: aws-actions/configure-aws-credentials@v1
       with:
-        role-to-assume: ${{ vars.BUILD_ROLE }}
+        role-to-assume: ${{ secrets.BUILD_ROLE }}
         aws-region: ${{ vars.AWS_REGION }}
         role-external-id: ${{ secrets.BUILD_ROLE_EXTERNAL_ID }}
         role-session-name: GitHubBuildNotifications
