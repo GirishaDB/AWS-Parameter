@@ -23,9 +23,6 @@ env:
 jobs:
  integration-test:
   runs-on: [ ubuntu-latest ]
-  defaults:
-    run:
-      working-directory: src/edh/python/tests/integration
   steps:
     - name: Check out repository code
       uses: actions/checkout@v2
@@ -35,6 +32,7 @@ jobs:
         python-version: 3.11
     - name: Install dependencies for integration testing
       run: |
+        cd src/python/tests/integration
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
@@ -49,7 +47,9 @@ jobs:
         role-duration-seconds: 900
         
     - name: Run integration tests
-      run: python3 integration.py
+      run: |
+        cd src/python/tests/integration
+        python3 integration.py
 # jobs:
 #     run-tests:
 #       runs-on: ubuntu-latest
