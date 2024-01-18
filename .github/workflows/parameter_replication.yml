@@ -48,7 +48,7 @@ jobs:
 
       - name: Terraform deploy
         run: |
-          cd src/terraform
+          cd src/Terraform
           terraform init
           terraform plan
           terraform apply
@@ -73,7 +73,7 @@ jobs:
     runs-on: [ ubuntu-latest ]
     defaults:
       run:
-        working-directory: ${{ github.workspace }}/src/terraform
+        working-directory: ${{ github.workspace }}/src/Terraform
     
     steps:
       - name: Check out repository code
