@@ -22,6 +22,7 @@ env:
     
 jobs:
   integration-test:
+    if: ${{ github.event.pull_request.merged == true }}
     runs-on: [ ubuntu-latest ]
     defaults:
       run:
@@ -41,7 +42,7 @@ jobs:
           pip3 install awscli --upgrade --user
 
       - name: Configure AWS Credentials
-        if: ${{ github.event.pull_request.merged == true }}
+        
         run: |
           aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
           aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
@@ -71,7 +72,7 @@ jobs:
 
   integration-test-resources-cleanup:
     needs: integration-test
-    if: ${{ needs.integration-test.result == 'success' || needs.integration-test.result == 'failure' }}
+    if: ${{ needs.integration-test.result == 'success' || needs.integration-test.result != 'success' }}
     runs-on: [ ubuntu-latest ]
     defaults:
       run:
@@ -104,7 +105,7 @@ jobs:
 
   integration-test-status:
     needs: [integration-test, integration-test-resources-cleanup]
-    if: ${{ needs.integration-test-resources-cleanup.result == 'success' || needs.integration-test-resources-cleanup.result == 'failure' }}
+    if: ${{ needs.integration-test-resources-cleanup.result == 'success' || needs.integration-test-resources-cleanup.result != 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Check integration-test result and set workflow status
