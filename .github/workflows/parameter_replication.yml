@@ -102,16 +102,33 @@ jobs:
           terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
 
   integration-test-status:
-    runs-on: ubuntu-latest
-    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
     needs: [integration-test, integration-test-resources-cleanup]
-    
+    runs-on: ubuntu-latest
     steps:
-      - name: test       
-        env:
-          NEEDS: ${{ toJSON(needs) }}     
+      - name: Check integration-test result and set workflow status
+        if: ${{ needs.integration-test.result == 'success' && needs.integration-test-resources-cleanup.result == 'success' }}
         run: |
-          echo "$NEEDS"
+          echo "Integration test Success"
+          exit 0
+      - name: Set workflow status for failed tests
+        if: ${{ needs.integration-test.result != 'success' || needs.integration-test-resources-cleanup.result != 'success' }}
+        run: |
+          echo "Integration test Failed"
+          exit 1
+
+
+          
+  # integration-test-status:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+  #   needs: [integration-test, integration-test-resources-cleanup]
+    
+  #   steps:
+  #     - name: test       
+  #       env:
+  #         NEEDS: ${{ toJSON(needs) }}     
+  #       run: |
+  #         echo "$NEEDS"
 
 # jobs:
 #     run-tests:
