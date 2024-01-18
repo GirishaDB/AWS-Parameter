@@ -46,12 +46,12 @@ jobs:
           aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
           aws configure set default.region ${{ vars.AWS_REGION }}
 
-      - name: Terraform deploy
-        run: |
-          cd src/Terraform
-          terraform init
-          terraform plan
-          terraform apply --auto-approve
+      # - name: Terraform deploy
+      #   run: |
+      #     cd src/Terraform
+      #     terraform init
+      #     terraform plan
+      #     terraform apply --auto-approve
 
       # - name: Set up Python 3.11
       #   uses: actions/setup-python@v4
@@ -107,7 +107,7 @@ jobs:
     steps:
       - name: Check integration-test result and set workflow status
         run: |
-          if [ ${{ needs.integration-test.result }} == 'success' ]; then
+          if [ "${{ needs.integration-test.result }}" == 'success' ]; then
             echo "Integration test passed"
           else
             echo "Integration test failed"
