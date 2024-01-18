@@ -71,6 +71,7 @@ jobs:
           python3 integration.py
 
   integration-test-resources-cleanup:
+    needs: integration-test
     runs-on: [ ubuntu-latest ]
     defaults:
       run:
