@@ -102,8 +102,8 @@ jobs:
 
   integration-test-status:
     needs: [integration-test, integration-test-resources-cleanup]
-    if: ${{ needs.integration-test.result != 'success' }}
     runs-on: ubuntu-latest
+    if: ${{ needs.integration-test.result != 'success' }}
     steps:
       - name: Check integration-test result and set workflow status
         run: |
