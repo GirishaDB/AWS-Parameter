@@ -106,7 +106,7 @@ jobs:
   integration-test-status:
     
     needs: [integration-test, integration-test-resources-cleanup]
-    if: ${{ success() }}
+    if: always() && (github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     steps:
       - name: Check integration-test result and set workflow status
