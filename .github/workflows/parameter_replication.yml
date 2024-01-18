@@ -103,7 +103,6 @@ jobs:
   integration-test-status:
     needs: [integration-test, integration-test-resources-cleanup]
     runs-on: ubuntu-latest
-    if: ${{ always() }}
     steps:
       - name: Check integration-test result and set workflow status
         if: ${{ needs.integration-test.result == 'success' }}
