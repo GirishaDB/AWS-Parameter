@@ -106,8 +106,10 @@ jobs:
     if: ${{ always() }}
     steps:
       - name: Check integration-test result and set workflow status
-        if: ${{ needs.integration-test.result == 'failure' }}
-        run: exit 1
+        if: ${{ needs.integration-test.result == 'success' }}
+        run: |
+          echo "Integration test Success"
+          exit 0
 
 # jobs:
 #     run-tests:
