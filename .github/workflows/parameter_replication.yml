@@ -51,7 +51,7 @@ jobs:
           cd src/Terraform
           terraform init
           terraform plan
-          terraform apply
+          terraform apply --auto-approve
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v4
@@ -96,7 +96,7 @@ jobs:
   
       - name: Terraform Init
         run: terraform init
-      - name: Terraform Destroy
+      - name: Terraform Destroy --auto-approve
         run: |
           terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
 
