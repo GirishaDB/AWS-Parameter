@@ -62,7 +62,6 @@ resource "aws_cloudwatch_event_target" "event_bridge_target_lambda" {
 }
 
 
-
 #Cloud Watch log group
 resource "aws_cloudwatch_log_group" "event_rule_log_group" {
   name              = "/aws/events/${join("-", [var.platform_name, var.account_name, var.region, "parameter-replication-logs", var.env])}"

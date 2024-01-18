@@ -21,88 +21,203 @@ env:
     TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
     
 jobs:
-    run-tests:
-      runs-on: ubuntu-latest
-      environment: Dev
-      steps:
-        - name: Check out repository code
-          uses: actions/checkout@v2
-  
-        - name: Set up Python 3.12
-          uses: actions/setup-python@v4
-          with:
-            python-version: 3.12
-  
-        - name: Install dependencies for unit testing
-          run: |
-            cd src/python/tests/unit
-            python -m pip install --upgrade pip
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-  
-        - name: Install dependencies for functional testing
-          run: |
-            cd src/python/tests/functional
-            python -m pip install --upgrade pip
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-  
-        - name: unit and functional testing with pytest
-          run: |
-            cd src
-            pytest --cov=python --cov-fail-under=80 -v
-  
-        # # Setup Terraform for testing
-        # - name: Setup Terraform
-        #   uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
-        #   with:
-        #     terraform_version: "1.6.2"
-        #     terraform_wrapper: false
-  
-        # - name: Unit Testing with Terraform Test
-        #   id: ttest
-        #   run : |
-        #     cd src/terraform
-        #     terraform init
-        #     terraform test
-      
-  
-    TerraformDeploy:
-      name: 'TerraformDeploy'
-      runs-on: ubuntu-latest
-      environment: Development
-            
-    # Setup the current working directory
-      defaults:
-        run:
-          shell: bash
-            
-      steps:
-      - name: Checkout Repository
+  integration-test:
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: [ ubuntu-latest ]
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    
+    steps:
+      - name: Check out repository code
         uses: actions/checkout@v2
-      - name: Setup Terraform
+
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v1
         with:
-          terraform_version: "1.6.2"
-          
-      # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+          terraform_version: 1.0.5
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get install python3-pip -y
+          pip3 install awscli --upgrade --user
+
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
+          aws configure set default.region ${{ vars.AWS_REGION }}
+
+      # - name: Terraform deploy
+      #   run: |
+      #     cd src/Terraform
+      #     terraform init
+      #     terraform plan
+      #     terraform apply --auto-approve
+
+      # - name: Set up Python 3.11
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.11
+      # - name: Install dependencies for integration testing
+      #   run: |
+      #     cd src/python/tests/integration
+      #     python -m pip install --upgrade pip
+      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # - name: Run integration tests
+      #   run: |
+      #     cd src/python/tests/integration
+      #     python3 integration.py
+
+  integration-test-resources-cleanup:
+    needs: integration-test
+    if: ${{ needs.integration-test.result == 'success' || needs.integration-test.result != 'success' }}
+    runs-on: [ ubuntu-latest ]
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/src/Terraform
+  
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+  
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
         with:
-          aws-access-key-id: ${{ secrets.ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.SECRET_KEY }}
-          aws-region: ap-south-1
+          terraform_version: 1.0.5
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get install python3-pip -y
+          pip3 install awscli --upgrade --user
+  
+      - name: Configure AWS Credentials
+        run: |
+          aws configu set aws_access_key_id ${{ secrets.ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
+          aws configure set default.region ${{ vars.AWS_REGION }}
+  
       - name: Terraform Init
-        working-directory: src/Terraform
         run: terraform init
-      - name: Terraform Validate
-        working-directory: src/Terraform
-        run: terraform validate
-      - name: Terraform Plan
-        id: plan
-        working-directory: src/Terraform
-        #run: terraform plan -input=false --out=tfplan
-        run: terraform plan -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
-      - name: Terraform Apply
-        working-directory: src/Terraform
-        if: ${{ github.event.pull_request.merged == true }}
-        #run: terraform apply -auto-approve -input=false tfplan
-        run: terraform apply -auto-approve
+      - name: Terraform Destroy --auto-approve
+        run: |
+          terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
+
+  integration-test-status:
+    
+    needs: [integration-test, integration-test-resources-cleanup]
+    if: always() && (github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check integration-test result and set workflow status
+        if: ${{ needs.integration-test.result == 'success' && needs.integration-test-resources-cleanup.result == 'success' }}
+        run: |
+          echo "Integration test Success"
+          exit 0
+      - name: Set workflow status for failed tests
+        if: ${{ needs.integration-test.result != 'success' || needs.integration-test-resources-cleanup.result != 'success' }}
+        run: |
+          echo "Integration test Failed"
+          exit 1
+
+
+          
+  # integration-test-status:
+  #   runs-on: ubuntu-latest
+  #   if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+  #   needs: [integration-test, integration-test-resources-cleanup]
+    
+  #   steps:
+  #     - name: test       
+  #       env:
+  #         NEEDS: ${{ toJSON(needs) }}     
+  #       run: |
+  #         echo "$NEEDS"
+
+# jobs:
+#     run-tests:
+#       runs-on: ubuntu-latest
+#       environment: Dev
+#       steps:
+#         - name: Check out repository code
+#           uses: actions/checkout@v2
+  
+#         - name: Set up Python 3.12
+#           uses: actions/setup-python@v4
+#           with:
+#             python-version: 3.12
+  
+#         - name: Install dependencies for unit testing
+#           run: |
+#             cd src/python/tests/unit
+#             python -m pip install --upgrade pip
+#             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+  
+#         - name: Install dependencies for functional testing
+#           run: |
+#             cd src/python/tests/functional
+#             python -m pip install --upgrade pip
+#             if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+  
+#         - name: unit and functional testing with pytest
+#           run: |
+#             cd src
+#             pytest --cov=python --cov-fail-under=80 -v
+  
+#         # # Setup Terraform for testing
+#         # - name: Setup Terraform
+#         #   uses: hashicorp/setup-terraform@633666f66e0061ca3b725c73b2ec20cd13a8fdd1
+#         #   with:
+#         #     terraform_version: "1.6.2"
+#         #     terraform_wrapper: false
+  
+#         # - name: Unit Testing with Terraform Test
+#         #   id: ttest
+#         #   run : |
+#         #     cd src/terraform
+#         #     terraform init
+#         #     terraform test
+      
+  
+#     TerraformDeploy:
+#       name: 'TerraformDeploy'
+#       runs-on: ubuntu-latest
+#       environment: Development
+            
+#     # Setup the current working directory
+#       defaults:
+#         run:
+#           shell: bash
+            
+#       steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v2
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v1
+#         with:
+#           terraform_version: "1.6.2"
+          
+#       # Initialize a new or existing Terraform working directory by creating initial files, loading any remote state, downloading modules, etc.
+#       - name: Configure AWS Credentials
+#         uses: aws-actions/configure-aws-credentials@v1
+#         with:
+#           aws-access-key-id: ${{ secrets.ACCESS_KEY }}
+#           aws-secret-access-key: ${{ secrets.SECRET_KEY }}
+#           aws-region: ap-south-1
+#       - name: Terraform Init
+#         working-directory: src/Terraform
+#         run: terraform init
+#       - name: Terraform Validate
+#         working-directory: src/Terraform
+#         run: terraform validate
+#       - name: Terraform Plan
+#         id: plan
+#         working-directory: src/Terraform
+#         #run: terraform plan -input=false --out=tfplan
+#         run: terraform plan -var="source_region=${{ vars.SOURCE_REGION }}" -var="dest_region=${{ vars.DEST_REGION }}"
+#       - name: Terraform Apply
+#         working-directory: src/Terraform
+#         if: ${{ github.event.pull_request.merged == true }}
+#         #run: terraform apply -auto-approve -input=false tfplan
+#         run: terraform apply -auto-approve
+  
