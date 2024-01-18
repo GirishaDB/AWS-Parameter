@@ -104,6 +104,7 @@ jobs:
           terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
 
   integration-test-status:
+    if: ${{ needs.integration-test-resources-cleanup.result == 'success' || needs.integration-test-resources-cleanup.result != 'success' }}
     needs: [integration-test, integration-test-resources-cleanup]
     
     runs-on: ubuntu-latest
