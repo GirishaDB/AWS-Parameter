@@ -41,6 +41,7 @@ jobs:
           pip3 install awscli --upgrade --user
 
       - name: Configure AWS Credentials
+        if: ${{ github.event.pull_request.merged == true }}
         run: |
           aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
           aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
