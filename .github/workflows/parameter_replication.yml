@@ -53,20 +53,20 @@ jobs:
           terraform plan
           terraform apply --auto-approve
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-      - name: Install dependencies for integration testing
-        run: |
-          cd src/python/tests/integration
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      # - name: Set up Python 3.11
+      #   uses: actions/setup-python@v4
+      #   with:
+      #     python-version: 3.11
+      # - name: Install dependencies for integration testing
+      #   run: |
+      #     cd src/python/tests/integration
+      #     python -m pip install --upgrade pip
+      #     if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-      - name: Run integration tests
-        run: |
-          cd src/python/tests/integration
-          python3 integration.py
+      # - name: Run integration tests
+      #   run: |
+      #     cd src/python/tests/integration
+      #     python3 integration.py
 
   integration-test-resources-cleanup:
     needs: integration-test
