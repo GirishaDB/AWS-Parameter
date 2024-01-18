@@ -107,7 +107,7 @@ jobs:
     steps:
       - name: Check integration-test result and set workflow status
         run: |
-          if: needs.integration-test.outcome == 'Success' 
+          if: needs.integration-test.outcome == 'success' 
             echo "Integration test passed"
             exit 0  
           else
