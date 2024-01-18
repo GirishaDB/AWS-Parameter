@@ -3,7 +3,7 @@ import boto3
 import time
 import json
 
-os.environ['AWS_DEFAULT_REGION'] = 'eu-west-1'
+os.environ['AWS_DEFAULT_REGION'] = 'ap-south-1'
 
 
 def create_parameters():
