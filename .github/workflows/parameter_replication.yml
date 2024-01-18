@@ -26,7 +26,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{ github.workspace }}
-    continue-on-error: true
+    
     steps:
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -101,14 +101,16 @@ jobs:
           terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
 
   integration-test-status:
-    needs: [integration-test, integration-test-resources-cleanup]
     runs-on: ubuntu-latest
+    if: ${{ always() && contains(join(needs.*.result, ','), 'success') }}
+    needs: [integration-test, integration-test-resources-cleanup]
+    
     steps:
-      - name: Check integration-test result and set workflow status
-        if: needs.integration-test.conclusion == 'failure'
+      - name: test       
+        env:
+          NEEDS: ${{ toJSON(needs) }}     
         run: |
-          echo "Integration test failed"
-          exit 1
+          echo "$NEEDS"
 
 # jobs:
 #     run-tests:
