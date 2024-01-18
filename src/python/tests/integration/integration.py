@@ -20,7 +20,7 @@ def validate_event_bridge_create_capture():
     time.sleep(50)
     logs_client = boto3.client(
         'logs', region_name=os.environ.get('SOURCE_REGION'))
-    log_group_name = f'/aws/events/se-intelds-{os.environ.get("EDH_ACC_NAME_SHORT")}-euwe1-parameter-replication-logs-{os.environ.get("ENV")}'
+    log_group_name = f'/aws/events/se-intelds-{os.environ.get("EDH_ACC_NAME_SHORT")}-euwe1-parameter-replication-test-{os.environ.get("ENV")}'
     parameter_name = '/sample/parameter1'
 
     response = logs_client.describe_log_streams(

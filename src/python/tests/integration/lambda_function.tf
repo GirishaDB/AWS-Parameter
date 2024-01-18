@@ -60,3 +60,41 @@ resource "aws_cloudwatch_event_target" "event_bridge_target_lambda" {
   rule       = aws_cloudwatch_event_rule.event_bridge.name
   arn        = aws_lambda_function.parameter_replication.arn
 }
+
+
+#Cloud Watch log group
+resource "aws_cloudwatch_log_group" "event_rule_log_group" {
+  name              = "/aws/events/${join("-", [var.platform_name, var.account_name, var.region, "parameter-replication-logs", var.env])}"
+  retention_in_days = 30
+}
+
+#Log Group Policy
+data "aws_iam_policy_document" "log_group_policy" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:PutLogEventsBatch",
+    ]
+
+    resources = ["arn:aws:logs:*"]
+
+    principals {
+      identifiers = ["events.amazonaws.com", "delivery.logs.amazonaws.com"]
+      type        = "Service"
+    }
+  }
+}
+
+resource "aws_cloudwatch_log_resource_policy" "cloudwatch_log_policy" {
+  depends_on      = [aws_cloudwatch_log_group.event_rule_log_group]
+  policy_name     = join("-", [var.platform_name, var.account_name, "parameter-replication-log-group-policy", var.env])
+  policy_document = data.aws_iam_policy_document.log_group_policy.json
+}
+
+#Attaching Log group to event bridge
+resource "aws_cloudwatch_event_target" "event_bridge_target_logs" {
+  depends_on = [aws_cloudwatch_log_group.event_rule_log_group]
+  rule       = join("-", [var.platform_name, var.account_name, var.region, "parameter-replication-event-bridge", var.env])
+  arn        = aws_cloudwatch_log_group.event_rule_log_group.arn
+}

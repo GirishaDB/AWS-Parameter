@@ -21,36 +21,100 @@ env:
     TF_VAR_secret_key: ${{ secrets.SECRET_KEY }}
     
 jobs:
- integration-test:
-  runs-on: [ ubuntu-latest ]
-  steps:
-    - name: Check out repository code
-      uses: actions/checkout@v2
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v4
-      with:
-        python-version: 3.11
-    - name: Install dependencies for integration testing
-      run: |
-        cd src/python/tests/integration
-        python -m pip install --upgrade pip
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+  integration-test:
+    runs-on: [ ubuntu-latest ]
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/src/python/tests/integration
+    continue-on-error: true
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
 
-    - name: Install AWS CLI
-      run: |
-        sudo apt-get install python3-pip -y
-        pip3 install awscli --upgrade --user
+      - name: Set up Terraform
+        uses: hashicorp\/setup-terraform@v1
+        with:
+          terraform_version: 1.0.5
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get install python3-pip -y
+          pip3 install awscli --upgrade --user
 
-    - name: Configure AWS Credentials
-      run: |
-        aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
-        aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
-        aws configure set default.region ${{ vars.AWS_REGION }}
-        
-    - name: Run integration tests
-      run: |
-        cd src/python/tests/integration
-        python3 integration.py
+      - name: Configure AWS Credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
+          aws configure set default.region ${{ vars.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Validate
+        run: terraform validate
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+      - name: Install dependencies for integration testing
+        run: |
+          cd src/python/tests/integration
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run integration tests
+        run: |
+          cd src/python/tests/integration
+          python3 integration.py
+
+  integration-test-resources-cleanup:
+    runs-on: [ ubuntu-latest ]
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}/src/python/tests/integration
+    
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v2
+  
+      - name: Set up Terraform
+        uses: hashicorp\/setup-terraform@v1
+        with:
+          terraform_version: 1.0.5
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get install python3-pip -y
+          pip3 install awscli --upgrade --user
+  
+      - name: Configure AWS Credentials
+        run: |
+          aws configure set aws_access_key_id ${{ secrets.ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.SECRET_KEY }}
+          aws configure set default.region ${{ vars.AWS_REGION }}
+  
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Destroy
+        run: |
+          terraform destroy -target aws_cloudwatch_log_group.event_rule_log_group
+
+  integration-test-status:
+    needs: integration-test-resources-cleanup
+    runs-on: [ ubuntu-latest ]
+    if: ${{ always() }}
+    steps:
+      - name: Check integration-test result and set workflow status
+        run: |
+          if [ ${{ needs.integration-test.result }} == 'success' ]; then
+            echo "Integration test passed"
+          else
+            echo "Integration test failed"
+            exit 1
+          fi
+
 # jobs:
 #     run-tests:
 #       runs-on: ubuntu-latest
