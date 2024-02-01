@@ -39,7 +39,6 @@ jobs:
               -Dsonar.organization=girishadb
               -Dsonar.projectKey=AWS-Parameter
               -Dsonar.sources=.
-
     
 # jobs:
 #   integration-test:
