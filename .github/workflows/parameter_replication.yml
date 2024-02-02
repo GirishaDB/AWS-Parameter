@@ -46,7 +46,7 @@ jobs:
         
       - name: Check SonarQube Analysis Result
         run: |
-          sonar_status=$(curl -sS -u ${{ secrets.SONAR_TOKEN }}: https://sonarcloud.io/api/qualitygates/project_status?projectKey=AWS-Parameter | jq -r .projectStatus.status)
+          sonar_status=$(curl -s -u ${{ secrets.SONAR_TOKEN }}: "https://sonarcloud.io/api/qualitygates/project_status?projectKey=AWS-Parameter" | jq -r '.projectStatus.status')
           echo "SonarQube Analysis Result: $sonar_status"
           echo "::set-output name=sonar_status::$sonar_status"
          
