@@ -57,8 +57,7 @@ jobs:
             echo "SonarQube analysis failed."
             exit 1
           fi
-      
-    
+          
               
 # jobs:
 #   integration-test:
