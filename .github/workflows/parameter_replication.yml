@@ -30,6 +30,7 @@ jobs:
         with:
             fetch-depth: 0
       - name: SonarCloud Scan
+        id: sonarqube-scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
             GITHUB_TOKEN: ${{ secrets.GIT_TOKEN }}
@@ -39,6 +40,21 @@ jobs:
               -Dsonar.organization=girishadb
               -Dsonar.projectKey=AWS-Parameter
               -Dsonar.sources=.
+              
+        
+      - name: Check SonarQube Analysis Result
+        run: |
+          sonar_status=$(curl -sS -u ${{ secrets.SONAR_TOKEN }}: https://sonarcloud.io/api/qualitygates/project_status?projectKey=AWS-Parameter | jq -r .projectStatus.status)
+          echo "::set-output name=sonar_status::$sonar_status"
+
+      - name: Fail if SonarQube Analysis Failed
+        if: always()
+        run: |
+          if [ "${{ steps.sonarqube-scan.outputs.sonar_status }}" != "OK" ]; then
+            echo "SonarQube analysis failed."
+            exit 1
+          fi
+      
     
               
 # jobs:
