@@ -4,10 +4,10 @@ resource "aws_security_group" "https-sg" {
   name        = local.https_sg
   description = "Security Group for endpoints - https traffic"
   ingress {
-    from_port   = 0
-    to_port     = 0
+    from_port   = 443
+    to_port     = 443
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.120.128.15/32"]
     description = "Allowing https traffic for specific subnet IPs ranges"
   }
   egress {
