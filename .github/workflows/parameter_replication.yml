@@ -40,6 +40,8 @@ jobs:
               -Dsonar.organization=girishadb
               -Dsonar.projectKey=AWS-Parameter
               -Dsonar.sources=.
+              -Dsonar.qualitygate.wait=true
+              -Dsonar.qualitygate.timeout=300
               
         
       - name: Check SonarQube Analysis Result
