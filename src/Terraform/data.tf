@@ -42,22 +42,25 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 
   statement {
-    sid       = "ParametersOperations"
-    effect    = "Allow"
-    actions   = ["ssm:*"]
-    resources = ["arn:aws:ssm:${var.source_region}:${local.account_id}:parameter/*", "arn:aws:ssm:${var.dest_region}:${local.account_id}:parameter/*"]
+    sid     = "ParametersOperations"
+    effect  = "Allow"
+    actions = ["ssm:*"]
+    # resources = ["arn:aws:ssm:${var.source_region}:${local.account_id}:parameter/*", "arn:aws:ssm:${var.dest_region}:${local.account_id}:parameter/*"]
+    resources = ["*"]
   }
   statement {
-    sid       = "EventBridgeActions"
-    effect    = "Allow"
-    actions   = ["events:*"]
-    resources = ["arn:aws:events:${local.aws_region}:${local.account_id}:rule/${local.event_bridge}"]
+    sid     = "EventBridgeActions"
+    effect  = "Allow"
+    actions = ["events:*"]
+    # resources = ["arn:aws:events:${local.aws_region}:${local.account_id}:rule/${local.event_bridge}"]
+    resources = ["*"]
   }
   statement {
-    sid       = "InvokeFunction"
-    effect    = "Allow"
-    actions   = ["lambda:InvokeFunction"]
-    resources = ["arn:aws:lambda:${local.aws_region}:${local.account_id}:function/${local.lambda_function}*"]
+    sid     = "InvokeFunction"
+    effect  = "Allow"
+    actions = ["lambda:InvokeFunction"]
+    # resources = ["arn:aws:lambda:${local.aws_region}:${local.account_id}:function/${local.lambda_function}*"]
+    resources = ["*"]
   }
 
 }

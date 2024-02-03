@@ -78,7 +78,7 @@ data "aws_iam_policy_document" "log_group_policy" {
       "logs:PutLogEventsBatch",
     ]
 
-    resources = ["arn:aws:logs:*"]
+    resources = ["*"]
 
     principals {
       identifiers = ["events.amazonaws.com", "delivery.logs.amazonaws.com"]
