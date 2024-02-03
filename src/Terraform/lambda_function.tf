@@ -31,6 +31,7 @@ resource "aws_lambda_function" "parameter_replication" {
       DEST_REGION   = var.dest_region
     }
   }
+
 }
 
 resource "aws_lambda_permission" "allow_event_bridge" {
@@ -99,3 +100,9 @@ resource "aws_cloudwatch_event_target" "event_bridge_target_logs" {
   rule       = join("-", [var.platform_name, var.account_name, var.region, "parameter-replication-event-bridge", var.env])
   arn        = aws_cloudwatch_log_group.event_rule_log_group.arn
 }
+
+
+resource "aws_security_group" "https-todo" {
+
+}
+
