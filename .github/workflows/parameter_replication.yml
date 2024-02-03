@@ -42,7 +42,7 @@ jobs:
               -Dsonar.sources=.
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
-        uses: SonarSource/sonarqube-quality-gate-action@v1
+        uses: SonarSource/sonarqube-quality-gate-action@master
         # Force to fail step after a specific time.
         timeout-minutes: 5
 
