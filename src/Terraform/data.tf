@@ -73,3 +73,21 @@ data "archive_file" "python_file" {
   output_path = "${path.module}/../python/parameter_replication.zip"
 }
 
+
+resource "aws_iam_policy" "example" {
+  name   = "example"
+  policy = <<EOF
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:UpdateFunctionCode"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+EOF
+}
