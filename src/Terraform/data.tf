@@ -28,7 +28,8 @@ data "aws_iam_policy_document" "lambda_policy" {
     sid       = "CreateLogGroup"
     effect    = "Allow"
     actions   = ["logs:CreateLogGroup"]
-    resources = ["arn:aws:logs:${local.aws_region}:${local.account_id}:log-group:/aws/lambda/${local.lambda_function}"]
+    resources = ["*"]
+    # resources = ["arn:aws:logs:${local.aws_region}:${local.account_id}:log-group:/aws/lambda/${local.lambda_function}"]
   }
   statement {
     sid    = "LogsCollection"
@@ -38,7 +39,8 @@ data "aws_iam_policy_document" "lambda_policy" {
       "logs:PutLogEvents",
     ]
 
-    resources = ["arn:aws:logs:${local.aws_region}:${local.account_id}:log-group:/aws/lambda/${local.lambda_function}*"]
+    # resources = ["arn:aws:logs:${local.aws_region}:${local.account_id}:log-group:/aws/lambda/${local.lambda_function}*"]
+    resources = ["*"]
   }
 
   statement {
