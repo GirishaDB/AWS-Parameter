@@ -39,7 +39,7 @@ jobs:
           args: >
               -Dsonar.organization=girishadb
               -Dsonar.projectKey=AWS-Parameter
-              -Dsonar.sources=.
+              -Dsonar.sources=src/python
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
         uses: SonarSource/sonarqube-quality-gate-action@master
